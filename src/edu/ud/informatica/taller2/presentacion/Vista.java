@@ -27,7 +27,9 @@ class Vista extends JFrame{
         JLabel lbServerName;
         JLabel lbClientName;
         JLabel lbIpGame;
+        JLabel lbInicio;
 
+        lbInicio = new JLabel();
         btnInitGame = new JButton();
         btnJoinGame = new JButton();
         pnServer = new JPanel();
@@ -49,6 +51,17 @@ class Vista extends JFrame{
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLayout(null);
 
+        lbInicio.setText("Juego de Rayita");
+        add(lbInicio);
+        lbInicio.setBounds(80,50,100,20);
+
+        btnInitGame.setText("Iniciar Juego");
+        add(btnInitGame);
+        btnInitGame.setBounds(10,100,130,20);
+
+        btnJoinGame.setText("Unirme a un juego");
+        add(btnJoinGame);
+        btnJoinGame.setBounds(150,100,130,20);
     }
 
     private JButton btnInitGame;
