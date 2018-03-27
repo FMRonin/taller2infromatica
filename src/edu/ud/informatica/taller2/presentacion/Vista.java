@@ -34,6 +34,10 @@ class Vista extends JFrame{
         JLabel lbIpGame;
         JLabel lbInicio;
 
+        //Se limita el spinner desde la vista
+        SpinnerModel spinnerModel1 = new SpinnerNumberModel(10,10,50,1);
+        SpinnerModel spinnerModel2 = new SpinnerNumberModel(10,10,50,1);
+
         //Inicializan los objetos del panel de inicio
         pnIni = new JPanel();
         lbInicio = new JLabel();
@@ -47,9 +51,9 @@ class Vista extends JFrame{
         btnCreateConn = new JButton();
         btnReturnIni1 = new JButton();
         lbColumnas = new JLabel();
-        spColumnas = new JSpinner();
+        spColumnas = new JSpinner(spinnerModel1);
         lbFilas = new JLabel();
-        spFilas = new JSpinner();
+        spFilas = new JSpinner(spinnerModel2);
 
         //Inicializan los objetos del panel para conectarse como cliente
         pnClient = new JPanel();
@@ -110,14 +114,14 @@ class Vista extends JFrame{
         lbColumnas.setBounds(20,70,70,20);
 
         pnServer.add(spColumnas);
-        spColumnas.setBounds(100,70,40,20);
+        spColumnas.setBounds(100,70,50,20);
 
         lbFilas.setText("Filas:");
         pnServer.add(lbFilas);
-        lbFilas.setBounds(150,70,40,20);
+        lbFilas.setBounds(160,70,40,20);
 
         pnServer.add(spFilas);
-        spFilas.setBounds(200,70,40,20);
+        spFilas.setBounds(210,70,50,20);
 
         btnReturnIni1.setText("Regresar");
         pnServer.add(btnReturnIni1);
@@ -136,17 +140,17 @@ class Vista extends JFrame{
 
         lbClientName.setText("Nombre:");
         pnClient.add(lbClientName);
-        lbClientName.setBounds(20,30,60,20);
+        lbClientName.setBounds(20,60,60,20);
 
         pnClient.add(txfClientName);
-        txfClientName.setBounds(90,30,180,20);
+        txfClientName.setBounds(90,60,180,20);
 
         lbIpGame.setText("IP:");
         pnClient.add(lbIpGame);
-        lbIpGame.setBounds(20,60,60,20);
+        lbIpGame.setBounds(20,30,60,20);
 
         pnClient.add(txfIpGame);
-        txfIpGame.setBounds(90,60,180,20);
+        txfIpGame.setBounds(90,30,180,20);
 
         btnReturnIni2.setText("Regresar");
         pnClient.add(btnReturnIni2);
