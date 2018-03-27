@@ -30,6 +30,50 @@ class Model implements Runnable{
 
     public void iniciar() {
         getVentana().setSize( 300, 230);
+        getVentana().getPnIni().setBounds(0,0,
+                getVentana().getWidth(),getVentana().getHeight());
+        getVentana().getPnServer().setBounds(0,0,
+                getVentana().getWidth(),getVentana().getHeight());
+        getVentana().getPnClient().setBounds(0,0,
+                getVentana().getWidth(),getVentana().getHeight());
+
         getVentana().setVisible(true);
+    }
+
+    public void StartAsServer() {
+        getVentana().getPnIni().setVisible(false);
+        getVentana().getPnServer().setVisible(true);
+        getVentana().getPnClient().setVisible(false);
+        getVentana().getPnGame().setVisible(false);
+    }
+
+    public void StartAsClient() {
+        getVentana().getPnIni().setVisible(false);
+        getVentana().getPnServer().setVisible(false);
+        getVentana().getPnClient().setVisible(true);
+        getVentana().getPnGame().setVisible(false);
+    }
+
+    public void ReturnIni() {
+        getVentana().getPnIni().setVisible(true);
+        getVentana().getPnServer().setVisible(false);
+        getVentana().getPnClient().setVisible(false);
+        getVentana().getPnGame().setVisible(false);
+    }
+
+    public void CreateConn() {
+        ventana.setSize(700,550);
+        getVentana().getPnIni().setVisible(false);
+        getVentana().getPnServer().setVisible(false);
+        getVentana().getPnClient().setVisible(false);
+        getVentana().getPnGame().setVisible(true);
+    }
+
+    public void Connect() {
+        ventana.setSize(700,550);
+        getVentana().getPnIni().setVisible(false);
+        getVentana().getPnServer().setVisible(false);
+        getVentana().getPnClient().setVisible(false);
+        getVentana().getPnGame().setVisible(true);
     }
 }
