@@ -2,12 +2,15 @@ package edu.ud.informatica.taller2.presentacion;
 
 import edu.ud.informatica.taller2.logica.Sistema;
 
+import java.awt.*;
+
 public
 class Model implements Runnable{
 
     private Sistema sistema;
     private Vista ventana;
     private Thread hiloDibujo;
+
 
     public Sistema getSistema() {
         if (sistema == null){
@@ -25,7 +28,20 @@ class Model implements Runnable{
 
     @Override
     public void run() {
+        while(true) {
+            dibujarCuadros();
+        }
+    }
 
+    private void dibujarCuadros() {
+        Graphics2D g = (Graphics2D) getVentana().getCnvTablero().getGraphics();
+        double thickness = 5;
+        Stroke oldStroke = g.getStroke();
+        g.setStroke(new BasicStroke((float) thickness));
+        for(int i = 0 ; i < 5 ; i++) {
+            g.setColor(Color.GREEN);
+            g.drawRect(i*100,i*100,100,100);
+        }
     }
 
     public void iniciar() {
@@ -67,6 +83,8 @@ class Model implements Runnable{
         getVentana().getPnServer().setVisible(false);
         getVentana().getPnClient().setVisible(false);
         getVentana().getPnGame().setVisible(true);
+        hiloDibujo = new Thread(this);
+        hiloDibujo.start();
     }
 
     public void Connect() {
@@ -75,5 +93,7 @@ class Model implements Runnable{
         getVentana().getPnServer().setVisible(false);
         getVentana().getPnClient().setVisible(false);
         getVentana().getPnGame().setVisible(true);
+        hiloDibujo = new Thread(this);
+        hiloDibujo.start();
     }
 }
