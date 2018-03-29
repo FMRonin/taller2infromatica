@@ -22,6 +22,8 @@ class Vista extends JFrame{
         btnCreateConn.addActionListener(getControlador());
         btnReturnIni1.addActionListener(getControlador());
         btnReturnIni2.addActionListener(getControlador());
+        btnReturnIni3.addActionListener(getControlador());
+        cnvTablero.addMouseListener(getControlador());
     }
 
     private void initComponents() {
@@ -70,6 +72,7 @@ class Vista extends JFrame{
         btnEnviar = new JButton();
         rivalScore = new JLabel();
         myScore = new JLabel();
+        btnReturnIni3 = new JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         //setLayout(new BorderLayout());
@@ -169,8 +172,12 @@ class Vista extends JFrame{
         pnGame.setVisible(false);
 
         pnGame.add(cnvTablero);
-        cnvTablero.setBackground(Color.BLUE);
+        cnvTablero.setBackground(Color.GRAY);
         cnvTablero.setBounds(20,10,500,500);
+
+        btnReturnIni3.setText("Regresar al Inicio");
+        pnGame.add(btnReturnIni3);
+        btnReturnIni3.setSize(150,40);
 
     }
 
@@ -183,6 +190,7 @@ class Vista extends JFrame{
     private JSpinner spFilas;
     private JButton btnReturnIni1;
     private JButton btnReturnIni2;
+    private JButton btnReturnIni3;
     private JButton btnCreateConn;
     private JButton btnConnect;
     private JPanel pnClient;
@@ -276,6 +284,10 @@ class Vista extends JFrame{
 
     public JButton getBtnReturnIni2() {
         return btnReturnIni2;
+    }
+
+    public JButton getBtnReturnIni3() {
+        return btnReturnIni3;
     }
 
     public JButton getBtnCreateConn() {
