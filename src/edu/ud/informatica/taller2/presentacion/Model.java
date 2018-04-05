@@ -97,7 +97,7 @@ class Model implements Runnable{
                 }else { g.setColor(Color.WHITE); }
                 g.drawLine(x1, y1,x1,y1 + cuadro);
 
-                if((celdas[i][j] & 0b1111) > 0){
+                if((celdas[i][j] & 0b1111) == 0b1111){
                     if ((celdas[i][j] & 0b10000) == TURNO_SERVER) {
                         g.setColor(COLOR_SERVER);
                     }else {
@@ -193,18 +193,32 @@ class Model implements Runnable{
         int posY = (e.getY() - (MARGEN)) / cuadro;
         int sensibilidad = 2;
 
-        if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() && (celdas[posX][posY] & IZQUIERDA) == 0) {
-            celdas[posX][posY] += IZQUIERDA;
-            if (posX > 0){celdas[posX - 1][posY] += DERECHA;}
-        }else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() && (celdas[posX][posY] & ARRIBA) == 0){
-            celdas[posX][posY] += ARRIBA;
-            if (posY > 0){celdas[posX][posY - 1] += ABAJO;}
-        }else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() && (celdas[posX][posY] & ABAJO) == 0){
-            celdas[posX][posY] += ABAJO;
-            if (posY < filas - 1){celdas[posX][posY + 1] += ARRIBA;}
-        }else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() && (celdas[posX][posY] & DERECHA) == 0){
-            celdas[posX][posY] += DERECHA;
-            if (posX < columnas - 1){celdas[posX + 1][posY] += IZQUIERDA;}
+        try {
+
+            if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() && (celdas[posX][posY] & IZQUIERDA) == 0) {
+                celdas[posX][posY] += IZQUIERDA;
+                if (posX > 0) {
+                    celdas[posX - 1][posY] += DERECHA;
+                }
+            } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() && (celdas[posX][posY] & ARRIBA) == 0) {
+                celdas[posX][posY] += ARRIBA;
+                if (posY > 0) {
+                    celdas[posX][posY - 1] += ABAJO;
+                }
+            } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() && (celdas[posX][posY] & ABAJO) == 0) {
+                celdas[posX][posY] += ABAJO;
+                if (posY < filas - 1) {
+                    celdas[posX][posY + 1] += ARRIBA;
+                }
+            } else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() && (celdas[posX][posY] & DERECHA) == 0) {
+                celdas[posX][posY] += DERECHA;
+                if (posX < columnas - 1) {
+                    celdas[posX + 1][posY] += IZQUIERDA;
+                }
+            }
+        }catch (ArrayIndexOutOfBoundsException err)
+        {
+            System.err.println(err);
         }
 
 
