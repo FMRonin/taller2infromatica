@@ -106,7 +106,9 @@ class Model implements Runnable{
                     g.fillRect(x1, y1, cuadro,cuadro);
                 }else { g.setColor(Color.WHITE); }
 
+                System.out.print(celdas[i][j]);
             }
+            System.out.println("");
         }
     }
 
@@ -203,7 +205,7 @@ class Model implements Runnable{
             } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() && (celdas[posX][posY] & ARRIBA) == 0) {
                 celdas[posX][posY] += ARRIBA;
                 if (posY > 0) {
-                    celdas[posX][posY - 1] += ABAJO;
+                    celdas[posX][posY - 1] += ABAJO;//sistem.getTablero.ModificarCelda(posX,posY-1,sistema.turno)
                 }
             } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() && (celdas[posX][posY] & ABAJO) == 0) {
                 celdas[posX][posY] += ABAJO;
