@@ -297,4 +297,6 @@ class Vista extends JFrame{
     public JButton getBtnConnect() {
         return btnConnect;
     }
+
+    public void mensajeAlerta(String msg){ JOptionPane.showMessageDialog(null, msg);}
 }

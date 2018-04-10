@@ -44,15 +44,9 @@ class Cliente implements Runnable {
 
     }
 
-
     @Override
     public
     void run() {
-        if(bufferRespuesta != ""){
-            restpuesta = bufferRespuesta;
-            Sistema.validar();
-            Enviar();
-        }
 
     }
 

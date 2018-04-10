@@ -6,11 +6,10 @@ class Tablero {
     Celda[][] celda;
 
     public Tablero(int filas, int columnas){
-        Celda[][] celda = new Celda[filas][columnas]();
+        /*Celda[][] celda = new Celda[filas][columnas]();*/
     }
 
-    public void ModificarCelda(int fila, int colupna, int jugada, jugador){
-        celda.Jugada(jugada,jugador)
-    }
+    /*public void ModificarCelda(int fila, int colupna, int jugada, jugador){
+        celda.Jugada(jugada,jugador)*/
 
 }

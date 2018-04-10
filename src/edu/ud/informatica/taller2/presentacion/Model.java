@@ -1,9 +1,11 @@
 package edu.ud.informatica.taller2.presentacion;
 
+import edu.ud.informatica.taller2.logica.Servidor;
 import edu.ud.informatica.taller2.logica.Sistema;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 public
 class Model implements Runnable{
@@ -22,6 +24,7 @@ class Model implements Runnable{
     private Vista ventana;
     private Thread hiloDibujo;
 
+    private boolean tipoUser;
     private int filas;
     private int columnas;
     private int cuadro;
@@ -54,8 +57,20 @@ class Model implements Runnable{
         synchronized (hiloDibujo) {
             try {
                 while (true) {
-                    hiloDibujo.wait(100);
-                    dibujarCuadros();
+                    System.out.println(getSistema().getOpt());
+                    hiloDibujo.wait(500);
+                    /*switch (getSistema().getOpt()){
+                        case 1:
+                            StartAsClient();
+                            break;
+                        case 2:
+                            StartAsServer();
+                            break;
+                        case 3:
+                            startGame();
+                            break;
+                    }*/
+                    //dibujarCuadros();
                 }
             } catch (InterruptedException e) {
                 //e.printStackTrace();
@@ -147,7 +162,22 @@ class Model implements Runnable{
         hiloDibujo = null;
     }
 
-    public void CreateConn() {
+    public void CreateConn(){
+        String nombre = getVentana().getTxfServerName().getText();
+        if(nombre.equals(new String(""))){
+            getVentana().mensajeAlerta("Debe ingresar un nombre primero");
+        }
+        else
+        {
+            tipoUser = true;
+            getVentana().mensajeAlerta("Esperando que alguien se conecte");
+            getSistema().ConexionServicio(tipoUser);
+            hiloDibujo = new Thread(this);
+            hiloDibujo.start();
+        }
+    }
+
+    public void startGame(){
         filas = Integer.parseInt(getVentana().getSpFilas().getValue().toString());
         columnas = Integer.parseInt(getVentana().getSpColumnas().getValue().toString());
         celdas = new int[columnas][filas];
@@ -156,11 +186,28 @@ class Model implements Runnable{
         getVentana().getPnServer().setVisible(false);
         getVentana().getPnClient().setVisible(false);
         getVentana().getPnGame().setVisible(true);
-        hiloDibujo = new Thread(this);
-        hiloDibujo.start();
     }
 
     public void Connect() {
+        String nombre = getVentana().getTxfClientName().getText();
+        String ip= getVentana().getTxfIpGame().getText();
+        if(ip.equals(new String(""))){
+            getVentana().mensajeAlerta("Escriba una direccion ip");
+        }
+        else if (nombre.equals(new String(""))) {
+            getVentana().mensajeAlerta("Escriba un nombre");
+        }
+        else
+        {
+            tipoUser = false;
+            getSistema().ConexionServicio(tipoUser);
+            hiloDibujo = new Thread(this);
+            hiloDibujo.start();
+
+        }
+    }
+
+    public void conectarCliente(){
         //TODO: capturar datos al conectarse
         filas = 50;
         columnas = 50;
@@ -222,7 +269,5 @@ class Model implements Runnable{
         {
             System.err.println(err);
         }
-
-
     }
 }
