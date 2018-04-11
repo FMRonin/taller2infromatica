@@ -26,6 +26,10 @@ class Servidor implements Runnable{
     private byte buffer[] = new byte[30];
     private String ipCliente;
 
+    public Servidor(Sistema sistema){
+        this.sistema = sistema;
+    }
+
     public String getIpCliente() {
         return ipCliente;
     }

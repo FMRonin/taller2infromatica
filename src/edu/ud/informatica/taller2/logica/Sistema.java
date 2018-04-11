@@ -14,22 +14,22 @@ class Sistema{
     private Thread hiloCanal;
     private Servidor servidor;
     private Cliente cliente;
-    private Model model;
     private int opt = 0;
     private Boolean comandoValido;
+    // 0: esperando conexion, 1: esperando jugada cliente, 2: jugando, 3: finalizado
+    private int estadoJugada = 0;
+    private Tablero tablero;
+
 
     public Servidor getServidor() {
         if (servidor == null){
-            servidor = new Servidor();
+            servidor = new Servidor(this);
         }
         return servidor;
     }
 
-    public Model getModel() {
-        if (model == null){
-            model = new Model();
-        }
-        return model;
+    public int getEstadoJugada(){
+        return estadoJugada;
     }
 
     public Cliente getCliente() {
@@ -37,6 +37,12 @@ class Sistema{
             cliente = new Cliente();
         }
         return cliente;
+    }
+
+    public void setTablero(int filas, int columnas){
+        if (tablero == null){
+            tablero = new Tablero(filas, columnas);
+        }
     }
 
     public int getOpt() {
@@ -100,7 +106,10 @@ class Sistema{
                 {
                     switch (comando){
                         case "INI":
-                            setOpt(1);
+                            if(estadoJugada == 0){
+                                setOpt(1);
+                                estadoJugada = 2;
+                            }
                             break;
                         case "SNM":
                             setOpt(2);
@@ -125,7 +134,7 @@ class Sistema{
         }else {
             comandoValido = false;
         }
-        System.out.println(param);
+        //System.out.println(param);
     }
     /*public static
     void validar() {

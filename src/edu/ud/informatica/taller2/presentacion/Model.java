@@ -1,11 +1,9 @@
 package edu.ud.informatica.taller2.presentacion;
 
-import edu.ud.informatica.taller2.logica.Servidor;
 import edu.ud.informatica.taller2.logica.Sistema;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 
 public
 class Model implements Runnable{
@@ -38,6 +36,7 @@ class Model implements Runnable{
 
 
 
+
     public Sistema getSistema() {
         if (sistema == null){
             sistema = new Sistema();
@@ -57,20 +56,8 @@ class Model implements Runnable{
         synchronized (hiloDibujo) {
             try {
                 while (true) {
-                    System.out.println(getSistema().getOpt());
                     hiloDibujo.wait(500);
-                    /*switch (getSistema().getOpt()){
-                        case 1:
-                            StartAsClient();
-                            break;
-                        case 2:
-                            StartAsServer();
-                            break;
-                        case 3:
-                            startGame();
-                            break;
-                    }*/
-                    //dibujarCuadros();
+                    dibujarCuadros();
                 }
             } catch (InterruptedException e) {
                 //e.printStackTrace();
@@ -172,6 +159,7 @@ class Model implements Runnable{
             tipoUser = true;
             getVentana().mensajeAlerta("Esperando que alguien se conecte");
             getSistema().ConexionServicio(tipoUser);
+            startGame();
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
         }
@@ -180,6 +168,7 @@ class Model implements Runnable{
     public void startGame(){
         filas = Integer.parseInt(getVentana().getSpFilas().getValue().toString());
         columnas = Integer.parseInt(getVentana().getSpColumnas().getValue().toString());
+        getSistema().setTablero(filas, columnas);
         celdas = new int[columnas][filas];
         reSize();
         getVentana().getPnIni().setVisible(false);
@@ -203,7 +192,6 @@ class Model implements Runnable{
             getSistema().ConexionServicio(tipoUser);
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
-
         }
     }
 
@@ -243,27 +231,30 @@ class Model implements Runnable{
         int sensibilidad = 2;
 
         try {
-
-            if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() && (celdas[posX][posY] & IZQUIERDA) == 0) {
-                celdas[posX][posY] += IZQUIERDA;
-                if (posX > 0) {
-                    celdas[posX - 1][posY] += DERECHA;
+            if(getSistema().getEstadoJugada() == 2){
+                if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() && (celdas[posX][posY] & IZQUIERDA) == 0) {
+                    celdas[posX][posY] += IZQUIERDA;
+                    if (posX > 0) {
+                        celdas[posX - 1][posY] += DERECHA;
+                    }
+                } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() && (celdas[posX][posY] & ARRIBA) == 0) {
+                    celdas[posX][posY] += ARRIBA;
+                    if (posY > 0) {
+                        celdas[posX][posY - 1] += ABAJO;//sistem.getTablero.ModificarCelda(posX,posY-1,sistema.turno)
+                    }
+                } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() && (celdas[posX][posY] & ABAJO) == 0) {
+                    celdas[posX][posY] += ABAJO;
+                    if (posY < filas - 1) {
+                        celdas[posX][posY + 1] += ARRIBA;
+                    }
+                } else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() && (celdas[posX][posY] & DERECHA) == 0) {
+                    celdas[posX][posY] += DERECHA;
+                    if (posX < columnas - 1) {
+                        celdas[posX + 1][posY] += IZQUIERDA;
+                    }
                 }
-            } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() && (celdas[posX][posY] & ARRIBA) == 0) {
-                celdas[posX][posY] += ARRIBA;
-                if (posY > 0) {
-                    celdas[posX][posY - 1] += ABAJO;//sistem.getTablero.ModificarCelda(posX,posY-1,sistema.turno)
-                }
-            } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() && (celdas[posX][posY] & ABAJO) == 0) {
-                celdas[posX][posY] += ABAJO;
-                if (posY < filas - 1) {
-                    celdas[posX][posY + 1] += ARRIBA;
-                }
-            } else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() && (celdas[posX][posY] & DERECHA) == 0) {
-                celdas[posX][posY] += DERECHA;
-                if (posX < columnas - 1) {
-                    celdas[posX + 1][posY] += IZQUIERDA;
-                }
+            }else {
+                getVentana().mensajeAlerta("Esperando jugador");
             }
         }catch (ArrayIndexOutOfBoundsException err)
         {
