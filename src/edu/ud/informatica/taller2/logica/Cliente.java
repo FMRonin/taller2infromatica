@@ -9,7 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public
-class Cliente implements Runnable {
+class Cliente implements Runnable{
 
     static private final int PUERTO_SALIDA = 9090;
     static private final int TIMEOUT = 3000; // 3 segundos
@@ -17,15 +17,24 @@ class Cliente implements Runnable {
     private Sistema sistema;
     private Model modelo;
     private String mensaje = "";
-    private ServerSocket serverSocket;
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private Socket cliente;
+    private Socket envio;
     private Thread hiloConexion;
     private boolean conectado;
+    private String ipCliente;
 
     public Cliente(Sistema sistema){
         this.sistema = sistema;
+    }
+
+    public String getIpCliente() {
+        return ipCliente;
+    }
+
+    public void setIpCliente(String ipCliente) {
+        this.ipCliente = ipCliente;
     }
 
     public String getMensaje() {
@@ -58,22 +67,27 @@ class Cliente implements Runnable {
         return modelo;
     }
 
-    public void IniciarConexion() throws IOException {
-        serverSocket = new ServerSocket(PUERTO_SALIDA);
+    public void IniciarConexion(String IP) throws IOException {
+        cliente = new Socket(IP, 9090);
+        inputStream = new DataInputStream(cliente.getInputStream());
+        outputStream = new DataOutputStream(cliente.getOutputStream());
         hiloConexion = new Thread(this);
         hiloConexion.start();
     }
 
     public void Enviar(String mensaje){
-
+        try {
+            //outputStream = new DataOutputStream(cliente.getOutputStream());
+            outputStream.write(mensaje.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void Escuchar(){
+        extraerIP();
         eliminarEspacios();
-        //int out = getSistema().recepcionMensaje(getMensaje());
-        //if(out == 0){
-        //    FinalizarConexion();
-        //}
+        getSistema().recepcionMensaje(getMensaje());
     }
 
     public void FinalizarConexion(){
@@ -90,28 +104,33 @@ class Cliente implements Runnable {
         setMensaje(getMensaje().substring(0,posicion));
     }
 
+    public void extraerIP(){
+        String[] parts = getIpCliente().split("/");
+        int posicion= parts[1].indexOf(':');
+        setIpCliente(parts[1].substring(0,posicion));
+        System.out.println(getIpCliente());
+    }
+
     @Override
     public
     void run() {
         try {
             synchronized (hiloConexion){
+
                 while (conectado) {
-                    System.out.println("Esperando Conexion del servidor");
-                    cliente = serverSocket.accept();
-                    cliente.setSoTimeout(TIMEOUT);
-                    inputStream = new DataInputStream(cliente.getInputStream());
-                    byte buffer[] = new byte[30];
+                    //System.out.println("Esperando Conexion del Cliente");
+                    byte buffer[] = new byte[255];
                     inputStream.read(buffer);
                     mensaje = new String(buffer);
-                    Escuchar();
+                    System.out.println("OUT: "+mensaje);
+                    //Escuchar();
                     hiloConexion.wait(500);
                 }
             }
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         } catch (InterruptedException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
-
 }
