@@ -14,12 +14,20 @@ class Sistema{
     private Thread hiloCanal;
     private Servidor servidor;
     private Cliente cliente;
-    private int opt = 0;
     private Boolean comandoValido;
-    // 0: esperando conexion, 1: esperando jugada cliente, 2: jugando, 3: finalizado
+    // 0: esperando conexion, 1: Esperando nombre del contrincante, 2: Juego yo, 3: Esperando Jugada de adversario, 4: finalizado
     private int estadoJugada = 0;
     private Tablero tablero;
+    private int filas, columnas;
+    private Boolean tipoUsuario;
 
+    public Boolean getTipoUsuario() {
+        return tipoUsuario;
+    }
+
+    public void setTipoUsuario(Boolean tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
+    }
 
     public Servidor getServidor() {
         if (servidor == null){
@@ -45,14 +53,6 @@ class Sistema{
         }
     }
 
-    public int getOpt() {
-        return opt;
-    }
-
-    public void setOpt(int opt) {
-        this.opt = opt;
-    }
-
     public String armadoCodigo(Boolean tipo, String accion, String param){
         // tipo = true arma la cadena que coresponde al envio del codigo
         // tipo = false arma la cadena que corresponde a la respuesta de un codigo
@@ -67,7 +67,7 @@ class Sistema{
             codigo = idcabecera+fecha+hora+accion+param;
         }
         else{
-            codigo = accion + param;
+            codigo = accion + "," + param;
         }
 
         return codigo;
@@ -75,6 +75,8 @@ class Sistema{
 
     public void ConexionServicio(Boolean tipoUser)
     {
+        setTipoUsuario(tipoUser);
+
         if(tipoUser)
         {
             try {
@@ -107,30 +109,48 @@ class Sistema{
                     switch (comando){
                         case "INI":
                             if(estadoJugada == 0){
-                                setOpt(1);
-                                estadoJugada = 2;
+                                estadoJugada = 1;
                             }
                             break;
                         case "SNM":
-                            setOpt(2);
-                            param = mensaje.substring(20);
+                            if(estadoJugada == 1){
+                                if(getTipoUsuario()){
+                                    estadoJugada = 2;
+                                    param = mensaje.substring(20);
+                                }
+                                else
+                                {
+                                    estadoJugada = 3;
+                                    param = mensaje.substring(20);
+                                }
+                            }
                             break;
                         case "TUR":
-                            setOpt(3);
+                            if(estadoJugada == 2 || estadoJugada == 3)
+                            {
+                                param = mensaje.substring(20);
+                            }
                             break;
                         case "JUG":
-                            setOpt(4);
-                            param = mensaje.substring(20);
+                            if(estadoJugada == 2 || estadoJugada == 3)
+                            {
+                                param = mensaje.substring(20);
+                            }
                             break;
                     }
                 }
             } catch (NumberFormatException e) {
                 comandoValido = false;
             }
-        }else if (mensaje.substring(0,2).equals("OK")
-                || mensaje.substring(0,2).equals("NK")){
-            comandoValido = true;
-            param = mensaje.substring(3);
+        } else if (mensaje.substring(0,2).equals("OK")){
+            if(estadoJugada == 0)
+            {
+                param = mensaje.substring(3);
+                String[] parts = param.split(",");
+                int filas = Integer.parseInt(parts[0]);
+                int columnas = Integer.parseInt(parts[1]);
+                comandoValido=false;
+            }
         }else {
             comandoValido = false;
         }
