@@ -5,8 +5,8 @@ class Tablero {
 
     Celda[][] celda;
 
-    int filas;
-    int columnas;
+    private int filas;
+    private int columnas;
 
     public Tablero(int filas, int columnas){
 

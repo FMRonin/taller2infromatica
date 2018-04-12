@@ -10,6 +10,13 @@ import java.util.Date;
 public
 class Sistema{
 
+
+    private final int ESPERANDO_CONEXION = 0;
+    private final int ESPERANDO_NOMBRE = 0;
+    private final int JUGANDO = 0;
+    private final int ESPERANDO_JUGADA = 0;
+    private final int FINALIZADO = 0;
+
     private boolean turno;
     private Thread hiloCanal;
     private Servidor servidor;
@@ -18,7 +25,6 @@ class Sistema{
     // 0: esperando conexion, 1: Esperando nombre del contrincante, 2: Juego yo, 3: Esperando Jugada de adversario, 4: finalizado
     private int estadoJugada = 0;
     private Tablero tablero;
-    private int filas, columnas;
     private Boolean tipoUsuario;
     private String nombreServidor;
     private String IpServidor;
@@ -155,7 +161,8 @@ class Sistema{
                         case "INI":
                             if(estadoJugada == 0){
                                 estadoJugada = 1;
-                                String respuesta = armadoCodigo(false, "OK", "10,10");
+                                String respuesta = armadoCodigo(false, "OK",
+                                        getTablero().getFilas() + "," + getTablero().getColumnas());
                                 getServidor().Enviar(respuesta);
                             } else {
                                 respuestaMensaje = 0;
@@ -208,19 +215,26 @@ class Sistema{
                 if(posicion > 0){
                     //Si existe una coma en el parameatro, significa que es una respuesta de JUG
                     String[] parts = param.split(",");
-                    int estadoGame = Integer.parseInt(parts[0]);
+                    int estadoCelda = Integer.parseInt(parts[0]);
                     int estadoJuego = Integer.parseInt(parts[1]);
                     if(estadoJuego == 0){
+                        if (estadoCelda == 0){
+                            String respuesta = armadoCodigo(true, "TUR", (tipoUsuario)?"1":"2");
+                            tipoUsuario = !tipoUsuario;
+                            getServidor().Enviar(respuesta);
+                        }else {
+                            estadoJugada = JUGANDO;
+                        }
                         respuestaMensaje = 1;
                         //Si estado juego es 0 , automaticamente se debe enviar TUR
                     } else {
+                        estadoJugada = FINALIZADO;
                         //Si estado juego es 1, se finaliza el juego
-                        estadoJugada = 4;
                     }
                 } else {
                     //Si no existe una coma en parametro, significa que es una respuesta de TUR
                     int turno = Integer.parseInt(param);
-                    estadoJugada = 3;
+                    estadoJugada = ESPERANDO_JUGADA;
                     respuestaMensaje = 1;
                 }
             }
@@ -265,5 +279,6 @@ class Sistema{
         tablero.Jugar(posY,posX,i,tipoUsuario);
         String respuesta = armadoCodigo(true, "JUG", posY + "," + posX + "," + i);
         getServidor().Enviar(respuesta);
+        estadoJugada = 3;
     }
 }
