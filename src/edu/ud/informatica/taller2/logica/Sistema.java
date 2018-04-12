@@ -20,6 +20,11 @@ class Sistema{
     private Tablero tablero;
     private int filas, columnas;
     private Boolean tipoUsuario;
+    private String nombreServidor;
+
+    public void setNombreServidor(String nombreServidor) {
+        this.nombreServidor = nombreServidor;
+    }
 
     public Boolean getTipoUsuario() {
         return tipoUsuario;
@@ -95,12 +100,13 @@ class Sistema{
         }
     }
 
-    public void recepcionMensaje(String mensaje){
-        String fecha = mensaje.substring(3,11);
-        String hora = mensaje.substring(11,17);
-        String comando = mensaje.substring(17,20);
+    public int recepcionMensaje(String mensaje){
+        int respuestaMensaje = 0;
         String param = null;
         if (mensaje.substring(0,3).equals("QDT")) {
+            String fecha = mensaje.substring(3,11);
+            String hora = mensaje.substring(11,17);
+            String comando = mensaje.substring(17,20);
             try {
                 int fechaInt = Integer.parseInt(fecha);
                 int horaInt = Integer.parseInt(hora);
@@ -110,31 +116,31 @@ class Sistema{
                         case "INI":
                             if(estadoJugada == 0){
                                 estadoJugada = 1;
+                                String respuesta = armadoCodigo(false, "OK", "10,10");
+                                getServidor().Enviar(respuesta);
+                            } else {
+                                respuestaMensaje = 0;
                             }
                             break;
                         case "SNM":
-                            if(estadoJugada == 1){
-                                if(getTipoUsuario()){
-                                    estadoJugada = 2;
-                                    param = mensaje.substring(20);
-                                }
-                                else
-                                {
-                                    estadoJugada = 3;
-                                    param = mensaje.substring(20);
-                                }
+                            if(estadoJugada == 1) {
+                                estadoJugada = 2;
+                                param = mensaje.substring(20);
+                                String respuesta = armadoCodigo(false, "OK", nombreServidor);
+                                getServidor().Enviar(respuesta);
                             }
                             break;
                         case "TUR":
-                            if(estadoJugada == 2 || estadoJugada == 3)
+                            if(estadoJugada == 3)
                             {
                                 param = mensaje.substring(20);
                             }
                             break;
                         case "JUG":
-                            if(estadoJugada == 2 || estadoJugada == 3)
+                            if(estadoJugada == 3)
                             {
                                 param = mensaje.substring(20);
+                                //CICLO MIENTRAS EVALUA EL PARAMETRO COMPLETO
                             }
                             break;
                     }
@@ -145,16 +151,62 @@ class Sistema{
         } else if (mensaje.substring(0,2).equals("OK")){
             if(estadoJugada == 0)
             {
+                //Como cliente recibo las filas y columnas del servidor y paso a estadoJugada 1
                 param = mensaje.substring(3);
                 String[] parts = param.split(",");
                 int filas = Integer.parseInt(parts[0]);
                 int columnas = Integer.parseInt(parts[1]);
-                comandoValido=false;
+                tablero = new Tablero(filas, columnas);
+                estadoJugada = 1;
+                respuestaMensaje = 1;
+            } else if (estadoJugada == 1){
+                //Como cliente recibo el nombre del servidor y paso a estadoJugada 3
+                param = mensaje.substring(3);
+                estadoJugada = 3;
+                respuestaMensaje = 1;
+            } else if (estadoJugada == 3) {
+                param = mensaje.substring(3);
+                int posicion = param.indexOf(',');
+                if(posicion > 0){
+                    //Si existe una coma en el parameatro, significa que es una respuesta de JUG
+                    String[] parts = param.split(",");
+                    int estadoGame = Integer.parseInt(parts[0]);
+                    int estadoJuego = Integer.parseInt(parts[1]);
+                    if(estadoJuego == 0){
+                        respuestaMensaje = 1;
+                        //Si estado juego es 0 , automaticamente se debe enviar TUR
+                    } else {
+                        //Si estado juego es 1, se finaliza el juego
+                        estadoJugada = 4;
+                    }
+                } else {
+                    //Si no existe una coma en parametro, significa que es una respuesta de TUR
+                    int turno = Integer.parseInt(param);
+                    estadoJugada = 3;
+                    respuestaMensaje = 1;
+                }
             }
-        }else {
-            comandoValido = false;
+        }else if (mensaje.substring(0,2).equals("NK")) {
+            if(estadoJugada == 0)
+            {
+                respuestaMensaje = 0;
+            } else if (estadoJugada == 1){
+
+            } else if (estadoJugada == 3) {
+                param = mensaje.substring(1);
+                int posicion = param.indexOf(',');
+                if(posicion > 0){
+                    //Si existe una coma en el parameatro, significa que es una respuesta de JUG
+                    String param2 = mensaje.substring(3);
+                    int respuesta = Integer.parseInt(param2);
+                    //sea la respuesta que llegue al NK, ese jugador debe volver a estado 2 para realizar otra jugada
+                    estadoJugada = 2;
+                } else {
+                    //Si no existe una coma en parametro, significa que es una respuesta de TUR
+                }
+            }
         }
-        //System.out.println(param);
+        return respuestaMensaje;
     }
     /*public static
     void validar() {

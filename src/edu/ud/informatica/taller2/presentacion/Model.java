@@ -56,8 +56,14 @@ class Model implements Runnable{
         synchronized (hiloDibujo) {
             try {
                 while (true) {
-                    hiloDibujo.wait(500);
-                    dibujarCuadros();
+                    if(tipoUser)
+                    {
+                        hiloDibujo.wait(500);
+                        dibujarCuadros();
+                    }
+                    else{
+
+                    }
                 }
             } catch (InterruptedException e) {
                 //e.printStackTrace();
@@ -157,6 +163,7 @@ class Model implements Runnable{
         else
         {
             tipoUser = true;
+            getSistema().setNombreServidor(nombre);
             getVentana().mensajeAlerta("Esperando que alguien se conecte");
             getSistema().ConexionServicio(tipoUser);
             startGame();

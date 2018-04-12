@@ -23,7 +23,6 @@ class Servidor implements Runnable{
     private Socket cliente;
     private Thread hiloConexion;
     private boolean conectado;
-    private byte buffer[] = new byte[30];
     private String ipCliente;
 
     public Servidor(Sistema sistema){
@@ -40,6 +39,10 @@ class Servidor implements Runnable{
 
     public String getMensaje() {
         return mensaje;
+    }
+
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
     }
 
     public boolean isConectado() {
@@ -76,11 +79,25 @@ class Servidor implements Runnable{
 
     public void Escuchar(){
         extraerIP();
-        getSistema().recepcionMensaje(getMensaje());
+        eliminarEspacios();
+        int out = getSistema().recepcionMensaje(getMensaje());
+        if(out == 0){
+            FinalizarConexion();
+        }
     }
 
     public void FinalizarConexion(){
+        try {
+            inputStream.close();
+            cliente.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void eliminarEspacios(){
+        int posicion = getMensaje().indexOf('\u0000');
+        setMensaje(getMensaje().substring(0,posicion));
     }
 
     public void extraerIP(){
@@ -100,13 +117,12 @@ class Servidor implements Runnable{
                     cliente = serverSocket.accept();
                     cliente.setSoTimeout(TIMEOUT);
                     inputStream = new DataInputStream(cliente.getInputStream());
+                    byte buffer[] = new byte[30];
                     inputStream.read(buffer);
                     mensaje = new String(buffer);
                     setIpCliente(cliente.getRemoteSocketAddress().toString());
                     Escuchar();
                     hiloConexion.wait(500);
-                    inputStream.close();
-                    cliente.close();
                 }
             }
         } catch (IOException e) {
