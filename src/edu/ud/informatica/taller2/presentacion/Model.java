@@ -171,7 +171,7 @@ class Model implements Runnable{
             bandera=true;
             getSistema().setNombreServidor(nombre);
             getSistema().setTipoUsuario(true);
-            getVentana().mensajeAlerta("Esperando que alguien se conecte");
+            //getVentana().mensajeAlerta("Esperando que alguien se conecte");
             startGame();
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
