@@ -23,6 +23,14 @@ class Sistema{
     private String nombreServidor;
     private String IpServidor;
 
+    public int getFilas() {
+        return filas;
+    }
+
+    public int getColumnas() {
+        return columnas;
+    }
+
     public void setNombreServidor(String nombreServidor) {
         this.nombreServidor = nombreServidor;
     }
@@ -122,7 +130,7 @@ class Sistema{
             try {
                 //connexion como cliente
                 getCliente().setConectado(true);
-                getCliente().IniciarConexion();
+                getCliente().IniciarConexion(getIpServidor());
                 String respuesta = armadoCodigo(true, "INI", "");
                 getCliente().Enviar(respuesta);
             } catch (IOException e) {
@@ -185,11 +193,10 @@ class Sistema{
                 //Como cliente recibo las filas y columnas del servidor y paso a estadoJugada 1
                 param = mensaje.substring(3);
                 String[] parts = param.split(",");
-                int filas = Integer.parseInt(parts[0]);
-                int columnas = Integer.parseInt(parts[1]);
+                filas = Integer.parseInt(parts[0]);
+                columnas = Integer.parseInt(parts[1]);
                 tablero = new Tablero(filas, columnas);
                 estadoJugada = 1;
-                respuestaMensaje = 1;
             } else if (estadoJugada == 1){
                 //Como cliente recibo el nombre del servidor y paso a estadoJugada 3
                 param = mensaje.substring(3);

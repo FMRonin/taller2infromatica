@@ -22,6 +22,8 @@ class Model implements Runnable{
     private int columnas;
     private int cuadro;
 
+    private boolean bandera;
+
     private Graphics2D g;
 
 
@@ -59,48 +61,68 @@ class Model implements Runnable{
 
     private void dibujarCuadros() {
 
-        int thickness = 1;
+        if(bandera) {
 
-        g = (Graphics2D) getVentana().getCnvTablero().getGraphics();
-        g.setStroke(new BasicStroke(thickness));
+            int thickness = 1;
 
-        for(int i = 0 ; i < columnas ; i++) {
-            for(int j = 0 ; j < filas ; j++){
-                int x1 = (i * cuadro) + MARGEN;
-                int y1 = (j * cuadro) + MARGEN;
+            g = (Graphics2D) getVentana().getCnvTablero().getGraphics();
+            g.setStroke(new BasicStroke(thickness));
 
-                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.ARRIBA) > 0){
-                    g.setColor(Color.RED);
-                }else { g.setColor(Color.WHITE); }
-                g.drawLine(x1,y1,x1 + cuadro,y1);
+            for (int i = 0; i < columnas; i++) {
+                for (int j = 0; j < filas; j++) {
+                    int x1 = (i * cuadro) + MARGEN;
+                    int y1 = (j * cuadro) + MARGEN;
 
-                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.DERECHA) > 0){
-                    g.setColor(Color.RED);
-                }else { g.setColor(Color.WHITE); }
-                g.drawLine(x1 + cuadro, y1,x1 + cuadro,y1 + cuadro);
-
-                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.ABAJO) > 0){
-                    g.setColor(Color.RED);
-                }else { g.setColor(Color.WHITE); }
-                g.drawLine(x1, y1 + cuadro,x1 + cuadro,y1 + cuadro);
-
-                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.IZQUIERDA) > 0){
-                    g.setColor(Color.RED);
-                }else { g.setColor(Color.WHITE); }
-                g.drawLine(x1, y1,x1,y1 + cuadro);
-
-                if(sistema.getTablero().getCelda(j,i).getBordeCelda() == Celda.LLENA){
-                    if (sistema.getTablero().getCelda(j,i).getEstadoCelda() == Celda.CERRADA_SERVIDOR) {
-                        g.setColor(COLOR_SERVER);
-                    }else if (sistema.getTablero().getCelda(j,i).getEstadoCelda() == Celda.CERRADA_CLIENTE){
-                        g.setColor(COLOR_SERVER);
+                    if ((sistema.getTablero().getCelda(j, i).getBordeCelda() & Celda.ARRIBA) > 0) {
+                        g.setColor(Color.RED);
+                    } else {
+                        g.setColor(Color.WHITE);
                     }
-                    g.fillRect(x1, y1, cuadro,cuadro);
-                }else { g.setColor(Color.WHITE); }
+                    g.drawLine(x1, y1, x1 + cuadro, y1);
 
-                //System.out.print(sistema.getTablero().getCelda(j,i).getBordeCelda());
+                    if ((sistema.getTablero().getCelda(j, i).getBordeCelda() & Celda.DERECHA) > 0) {
+                        g.setColor(Color.RED);
+                    } else {
+                        g.setColor(Color.WHITE);
+                    }
+                    g.drawLine(x1 + cuadro, y1, x1 + cuadro, y1 + cuadro);
+
+                    if ((sistema.getTablero().getCelda(j, i).getBordeCelda() & Celda.ABAJO) > 0) {
+                        g.setColor(Color.RED);
+                    } else {
+                        g.setColor(Color.WHITE);
+                    }
+                    g.drawLine(x1, y1 + cuadro, x1 + cuadro, y1 + cuadro);
+
+                    if ((sistema.getTablero().getCelda(j, i).getBordeCelda() & Celda.IZQUIERDA) > 0) {
+                        g.setColor(Color.RED);
+                    } else {
+                        g.setColor(Color.WHITE);
+                    }
+                    g.drawLine(x1, y1, x1, y1 + cuadro);
+
+                    if (sistema.getTablero().getCelda(j, i).getBordeCelda() == Celda.LLENA) {
+                        if (sistema.getTablero().getCelda(j, i).getEstadoCelda() == Celda.CERRADA_SERVIDOR) {
+                            g.setColor(COLOR_SERVER);
+                        } else if (sistema.getTablero().getCelda(j, i).getEstadoCelda() == Celda.CERRADA_CLIENTE) {
+                            g.setColor(COLOR_SERVER);
+                        }
+                        g.fillRect(x1, y1, cuadro, cuadro);
+                    } else {
+                        g.setColor(Color.WHITE);
+                    }
+
+                    //System.out.print(sistema.getTablero().getCelda(j,i).getBordeCelda());
+                }
+                //System.out.println("");
             }
-            //System.out.println("");
+        } else {
+            if (getSistema().getEstadoJugada() == 1){
+                filas = getSistema().getFilas();
+                columnas = getSistema().getColumnas();
+                conectarCliente();
+                bandera = true;
+            }
         }
     }
 
@@ -146,13 +168,14 @@ class Model implements Runnable{
         }
         else
         {
+            bandera=true;
             getSistema().setNombreServidor(nombre);
             getSistema().setTipoUsuario(true);
             getVentana().mensajeAlerta("Esperando que alguien se conecte");
-            getSistema().ConexionServicio(sistema.getTipoUsuario());
             startGame();
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
+            getSistema().ConexionServicio(sistema.getTipoUsuario());
         }
     }
 
@@ -178,26 +201,23 @@ class Model implements Runnable{
         }
         else
         {
+
             getSistema().setNombreServidor(nombre);
             getSistema().setIpServidor(ip);
             sistema.setTipoUsuario(false);
-            getSistema().ConexionServicio(sistema.getTipoUsuario());
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
+            getSistema().ConexionServicio(sistema.getTipoUsuario());
         }
     }
 
     public void conectarCliente(){
         //TODO: capturar datos al conectarse
-        filas = 50;
-        columnas = 50;
         reSize();
         getVentana().getPnIni().setVisible(false);
         getVentana().getPnServer().setVisible(false);
         getVentana().getPnClient().setVisible(false);
         getVentana().getPnGame().setVisible(true);
-        hiloDibujo = new Thread(this);
-        hiloDibujo.start();
     }
 
     private void reSize(){
