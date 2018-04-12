@@ -118,8 +118,8 @@ class Model implements Runnable{
             }
         } else {
             if (getSistema().getEstadoJugada() == 1){
-                filas = getSistema().getFilas();
-                columnas = getSistema().getColumnas();
+                filas = getSistema().getTablero().getFilas();
+                columnas = getSistema().getTablero().getColumnas();
                 conectarCliente();
                 bandera = true;
             }

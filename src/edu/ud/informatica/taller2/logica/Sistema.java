@@ -29,14 +29,6 @@ class Sistema{
     private String nombreServidor;
     private String IpServidor;
 
-    public int getFilas() {
-        return filas;
-    }
-
-    public int getColumnas() {
-        return columnas;
-    }
-
     public void setNombreServidor(String nombreServidor) {
         this.nombreServidor = nombreServidor;
     }
@@ -200,9 +192,7 @@ class Sistema{
                 //Como cliente recibo las filas y columnas del servidor y paso a estadoJugada 1
                 param = mensaje.substring(3);
                 String[] parts = param.split(",");
-                filas = Integer.parseInt(parts[0]);
-                columnas = Integer.parseInt(parts[1]);
-                tablero = new Tablero(filas, columnas);
+                tablero = new Tablero(Integer.parseInt(parts[0]) , Integer.parseInt(parts[1]));
                 estadoJugada = 1;
             } else if (estadoJugada == 1){
                 //Como cliente recibo el nombre del servidor y paso a estadoJugada 3
