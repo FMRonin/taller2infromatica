@@ -16,21 +16,49 @@ class Sistema{
     private final int JUGANDO = 0;
     private final int ESPERANDO_JUGADA = 0;
     private final int FINALIZADO = 0;
-
+    private boolean comandoValido;
     private boolean turno;
     private Thread hiloCanal;
     private Servidor servidor;
     private Cliente cliente;
-    private Boolean comandoValido;
-    // 0: esperando conexion, 1: Esperando nombre del contrincante, 2: Juego yo, 3: Esperando Jugada de adversario, 4: finalizado
+    // 0: esperando conexion, 1: Esperando nombre del contrincante, 2: Juego yo, 3: Esperando Jugada de adversario, 4: finalizado, 5.Analizando Jugada
     private int estadoJugada = 0;
     private Tablero tablero;
     private Boolean tipoUsuario;
+    private boolean swich;
     private String nombreServidor;
+    private String nombreCliente;
     private String IpServidor;
+    private int filaJugada;
+    private int columnaJugada;
+    private int trazoJugado;
+
+    public boolean isSwich() {
+        return swich;
+    }
+
+    public void setSwich(boolean swich) {
+        this.swich = swich;
+    }
+
+    public int getFilaJugada() {
+        return filaJugada;
+    }
+
+    public int getColumnaJugada() {
+        return columnaJugada;
+    }
+
+    public int getTrazoJugado() {
+        return trazoJugado;
+    }
 
     public void setNombreServidor(String nombreServidor) {
         this.nombreServidor = nombreServidor;
+    }
+
+    public void setNombreCliente(String nombreCliente) {
+        this.nombreCliente = nombreCliente;
     }
 
     public String getIpServidor() {
@@ -129,7 +157,7 @@ class Sistema{
                 //connexion como cliente
                 getCliente().setConectado(true);
                 getCliente().IniciarConexion(getIpServidor());
-                String respuesta = armadoCodigo(true, "INI", "");
+                String respuesta = armadoCodigo(true, "INI", null);
                 getCliente().Enviar(respuesta);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -178,7 +206,12 @@ class Sistema{
                             if(estadoJugada == 3)
                             {
                                 param = mensaje.substring(20);
-                                //CICLO MIENTRAS EVALUA EL PARAMETRO COMPLETO
+                                String[] parts = param.split(",");
+                                filaJugada = Integer.parseInt(parts[0]);
+                                columnaJugada = Integer.parseInt(parts[1]);
+                                trazoJugado = Integer.parseInt(parts[2]);
+                                estadoJugada = 5;
+                                swich = false;
                             }
                             break;
                     }
@@ -194,6 +227,7 @@ class Sistema{
                 String[] parts = param.split(",");
                 tablero = new Tablero(Integer.parseInt(parts[0]) , Integer.parseInt(parts[1]));
                 estadoJugada = 1;
+                getCliente().Enviar(armadoCodigo(true, "SNM", nombreCliente));
             } else if (estadoJugada == 1){
                 //Como cliente recibo el nombre del servidor y paso a estadoJugada 3
                 param = mensaje.substring(3);
@@ -250,14 +284,6 @@ class Sistema{
         }
 
     }
-    /*public static
-    void validar() {
-        respuesta = Cliente.getRestpuesta();
-        .
-        .
-        .
-        setMensaje(mensaje);
-    }*/
 
     public
     Tablero getTablero() {
@@ -266,9 +292,28 @@ class Sistema{
 
     public
     void Jugar(int posY, int posX, int i, Boolean tipoUsuario) {
-        tablero.Jugar(posY,posX,i,tipoUsuario);
-        String respuesta = armadoCodigo(true, "JUG", posY + "," + posX + "," + i);
-        getServidor().Enviar(respuesta);
-        estadoJugada = 3;
+        tablero.Jugar(posY, posX, i, tipoUsuario);
+        if(estadoJugada == 2) {
+            String respuesta = armadoCodigo(true, "JUG", posY + "," + posX + "," + i);
+            if(getTipoUsuario()) {
+                getServidor().Enviar(respuesta);
+            }
+            else
+            {
+                getCliente().Enviar(respuesta);
+            }
+            estadoJugada = 3;
+        }
+        else if(estadoJugada == 5){
+            String respuesta = armadoCodigo(false, "OK", "SALIDA");
+            if(getTipoUsuario()) {
+                getServidor().Enviar(respuesta);
+            }
+            else
+            {
+                getCliente().Enviar(respuesta);
+            }
+            estadoJugada = 3;
+        }
     }
 }
