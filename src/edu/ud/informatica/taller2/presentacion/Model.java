@@ -178,6 +178,8 @@ class Model implements Runnable{
         }
         else
         {
+            getSistema().setNombreServidor(nombre);
+            getSistema().setIpServidor(ip);
             sistema.setTipoUsuario(false);
             getSistema().ConexionServicio(sistema.getTipoUsuario());
             hiloDibujo = new Thread(this);

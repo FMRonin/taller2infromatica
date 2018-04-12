@@ -21,9 +21,18 @@ class Sistema{
     private int filas, columnas;
     private Boolean tipoUsuario;
     private String nombreServidor;
+    private String IpServidor;
 
     public void setNombreServidor(String nombreServidor) {
         this.nombreServidor = nombreServidor;
+    }
+
+    public String getIpServidor() {
+        return IpServidor;
+    }
+
+    public void setIpServidor(String ipServidor) {
+        IpServidor = ipServidor;
     }
 
     public Boolean getTipoUsuario() {
@@ -47,7 +56,7 @@ class Sistema{
 
     public Cliente getCliente() {
         if (cliente == null){
-            cliente = new Cliente();
+            cliente = new Cliente(this);
         }
         return cliente;
     }
@@ -69,10 +78,26 @@ class Sistema{
             DateFormat formatoHora = new SimpleDateFormat("HHmmss");
             String fecha = formatoFecha.format(fechaActual);
             String hora = formatoHora.format(fechaActual);
-            codigo = idcabecera+fecha+hora+accion+param;
+            if(param != null)
+            {
+                codigo = idcabecera+fecha+hora+accion+param;
+            }
+            else
+            {
+                codigo = idcabecera+fecha+hora+accion;
+            }
+
         }
         else{
-            codigo = accion + "," + param;
+            if(param != null)
+            {
+                codigo = accion + "," + param;
+            }
+            else
+            {
+                codigo = accion;
+            }
+
         }
 
         return codigo;
@@ -85,10 +110,8 @@ class Sistema{
         if(tipoUser)
         {
             try {
-                //conecto
+                //conexion como servidor
                 getServidor().setConectado(true);
-                String codigo = armadoCodigo(false,"INI","JAIRO");
-                System.out.println(codigo);
                 getServidor().IniciarConexion();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -96,7 +119,15 @@ class Sistema{
         }
         else
         {
-            System.out.println("OK");
+            try {
+                //connexion como cliente
+                getCliente().setConectado(true);
+                getCliente().IniciarConexion();
+                String respuesta = armadoCodigo(true, "INI", "");
+                getCliente().Enviar(respuesta);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -21,6 +21,7 @@ class Servidor implements Runnable{
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private Socket cliente;
+    private Socket envio;
     private Thread hiloConexion;
     private boolean conectado;
     private String ipCliente;
@@ -74,7 +75,12 @@ class Servidor implements Runnable{
     }
 
     public void Enviar(String mensaje){
-
+        try {
+            outputStream = new DataOutputStream(cliente.getOutputStream());
+            outputStream.write(mensaje.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void Escuchar(){
