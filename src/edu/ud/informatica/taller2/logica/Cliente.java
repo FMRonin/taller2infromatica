@@ -68,7 +68,7 @@ class Cliente implements Runnable{
     }
 
     public void IniciarConexion(String IP) throws IOException {
-        cliente = new Socket(IP, 9090);
+        cliente = new Socket(IP, PUERTO_SALIDA);
         inputStream = new DataInputStream(cliente.getInputStream());
         outputStream = new DataOutputStream(cliente.getOutputStream());
         hiloConexion = new Thread(this);
@@ -85,7 +85,6 @@ class Cliente implements Runnable{
     }
 
     public void Escuchar(){
-        extraerIP();
         eliminarEspacios();
         getSistema().recepcionMensaje(getMensaje());
     }
@@ -104,13 +103,6 @@ class Cliente implements Runnable{
         setMensaje(getMensaje().substring(0,posicion));
     }
 
-    public void extraerIP(){
-        String[] parts = getIpCliente().split("/");
-        int posicion= parts[1].indexOf(':');
-        setIpCliente(parts[1].substring(0,posicion));
-        System.out.println(getIpCliente());
-    }
-
     @Override
     public
     void run() {
@@ -122,8 +114,8 @@ class Cliente implements Runnable{
                     byte buffer[] = new byte[255];
                     inputStream.read(buffer);
                     mensaje = new String(buffer);
-                    System.out.println("OUT: "+mensaje);
-                    //Escuchar();
+                    System.out.println(mensaje);
+                    Escuchar();
                     hiloConexion.wait(500);
                 }
             }
