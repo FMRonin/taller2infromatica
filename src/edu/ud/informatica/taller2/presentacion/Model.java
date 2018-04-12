@@ -1,20 +1,16 @@
 package edu.ud.informatica.taller2.presentacion;
 
+import edu.ud.informatica.taller2.logica.Celda;
 import edu.ud.informatica.taller2.logica.Sistema;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
+
 public
 class Model implements Runnable{
 
     static private final int  MARGEN = 2;
-    static private final int ARRIBA = 0b1;
-    static private final int DERECHA = 0b10;
-    static private final int ABAJO = 0b100;
-    static private final int IZQUIERDA = 0b1000;
-    static private final int TURNO_SERVER = 0b0;
-    static private final int TURNO_CLIENT = 0b10000;
     static private final Color COLOR_SERVER = Color.BLUE;
     static private final Color COLOR_CLIENT = Color.GREEN;
 
@@ -22,17 +18,11 @@ class Model implements Runnable{
     private Vista ventana;
     private Thread hiloDibujo;
 
-    private boolean tipoUser;
     private int filas;
     private int columnas;
     private int cuadro;
-    int[][] celdas;
-    private int turno = TURNO_SERVER;
-    private int puntajeServer = 0;
-    private int puntajeCliente = 0;
 
     private Graphics2D g;
-    private Color colorJugador = COLOR_SERVER;
 
 
 
@@ -56,14 +46,8 @@ class Model implements Runnable{
         synchronized (hiloDibujo) {
             try {
                 while (true) {
-                    if(tipoUser)
-                    {
-                        hiloDibujo.wait(500);
-                        dibujarCuadros();
-                    }
-                    else{
-
-                    }
+                    hiloDibujo.wait(500);
+                    dibujarCuadros();
                 }
             } catch (InterruptedException e) {
                 //e.printStackTrace();
@@ -85,36 +69,36 @@ class Model implements Runnable{
                 int x1 = (i * cuadro) + MARGEN;
                 int y1 = (j * cuadro) + MARGEN;
 
-                if((celdas[i][j] & ARRIBA) > 0){
+                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.ARRIBA) > 0){
                     g.setColor(Color.RED);
                 }else { g.setColor(Color.WHITE); }
                 g.drawLine(x1,y1,x1 + cuadro,y1);
 
-                if((celdas[i][j] & DERECHA) > 0){
+                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.DERECHA) > 0){
                     g.setColor(Color.RED);
                 }else { g.setColor(Color.WHITE); }
                 g.drawLine(x1 + cuadro, y1,x1 + cuadro,y1 + cuadro);
 
-                if((celdas[i][j] & ABAJO) > 0){
+                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.ABAJO) > 0){
                     g.setColor(Color.RED);
                 }else { g.setColor(Color.WHITE); }
                 g.drawLine(x1, y1 + cuadro,x1 + cuadro,y1 + cuadro);
 
-                if((celdas[i][j] & IZQUIERDA) > 0){
+                if((sistema.getTablero().getCelda(j,i).getBordeCelda() & Celda.IZQUIERDA) > 0){
                     g.setColor(Color.RED);
                 }else { g.setColor(Color.WHITE); }
                 g.drawLine(x1, y1,x1,y1 + cuadro);
 
-                if((celdas[i][j] & 0b1111) == 0b1111){
-                    if ((celdas[i][j] & 0b10000) == TURNO_SERVER) {
+                if(sistema.getTablero().getCelda(j,i).getBordeCelda() == Celda.LLENA){
+                    if (sistema.getTablero().getCelda(j,i).getEstadoCelda() == Celda.CERRADA_SERVIDOR) {
                         g.setColor(COLOR_SERVER);
-                    }else {
+                    }else if (sistema.getTablero().getCelda(j,i).getEstadoCelda() == Celda.CERRADA_CLIENTE){
                         g.setColor(COLOR_SERVER);
                     }
                     g.fillRect(x1, y1, cuadro,cuadro);
                 }else { g.setColor(Color.WHITE); }
 
-                System.out.print(celdas[i][j]);
+                System.out.print(sistema.getTablero().getCelda(j,i).getBordeCelda());
             }
             System.out.println("");
         }
@@ -162,10 +146,10 @@ class Model implements Runnable{
         }
         else
         {
-            tipoUser = true;
             getSistema().setNombreServidor(nombre);
+            getSistema().setTipoUsuario(true);
             getVentana().mensajeAlerta("Esperando que alguien se conecte");
-            getSistema().ConexionServicio(tipoUser);
+            //getSistema().ConexionServicio(tipoUser);
             startGame();
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
@@ -176,7 +160,6 @@ class Model implements Runnable{
         filas = Integer.parseInt(getVentana().getSpFilas().getValue().toString());
         columnas = Integer.parseInt(getVentana().getSpColumnas().getValue().toString());
         getSistema().setTablero(filas, columnas);
-        celdas = new int[columnas][filas];
         reSize();
         getVentana().getPnIni().setVisible(false);
         getVentana().getPnServer().setVisible(false);
@@ -195,8 +178,8 @@ class Model implements Runnable{
         }
         else
         {
-            tipoUser = false;
-            getSistema().ConexionServicio(tipoUser);
+            sistema.setTipoUsuario(false);
+            getSistema().ConexionServicio(sistema.getTipoUsuario());
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
         }
@@ -206,7 +189,6 @@ class Model implements Runnable{
         //TODO: capturar datos al conectarse
         filas = 50;
         columnas = 50;
-        celdas = new int[columnas][filas];
         reSize();
         getVentana().getPnIni().setVisible(false);
         getVentana().getPnServer().setVisible(false);
@@ -238,27 +220,19 @@ class Model implements Runnable{
         int sensibilidad = 2;
 
         try {
-            if(getSistema().getEstadoJugada() == 2){
-                if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() && (celdas[posX][posY] & IZQUIERDA) == 0) {
-                    celdas[posX][posY] += IZQUIERDA;
-                    if (posX > 0) {
-                        celdas[posX - 1][posY] += DERECHA;
-                    }
-                } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() && (celdas[posX][posY] & ARRIBA) == 0) {
-                    celdas[posX][posY] += ARRIBA;
-                    if (posY > 0) {
-                        celdas[posX][posY - 1] += ABAJO;//sistem.getTablero.ModificarCelda(posX,posY-1,sistema.turno)
-                    }
-                } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() && (celdas[posX][posY] & ABAJO) == 0) {
-                    celdas[posX][posY] += ABAJO;
-                    if (posY < filas - 1) {
-                        celdas[posX][posY + 1] += ARRIBA;
-                    }
-                } else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() && (celdas[posX][posY] & DERECHA) == 0) {
-                    celdas[posX][posY] += DERECHA;
-                    if (posX < columnas - 1) {
-                        celdas[posX + 1][posY] += IZQUIERDA;
-                    }
+            if(getSistema().getEstadoJugada() != 2){
+                if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() &&
+                        (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.IZQUIERDA) == 0) {
+                    sistema.getTablero().Jugar(posY,posX,3,sistema.getTipoUsuario());
+                } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() &&
+                        (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.ARRIBA) == 0) {
+                    sistema.getTablero().Jugar(posY,posX,0,sistema.getTipoUsuario());
+                } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() &&
+                        (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.ABAJO) == 0) {
+                    sistema.getTablero().Jugar(posY,posX,2,sistema.getTipoUsuario());
+                } else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() &&
+                        (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.IZQUIERDA) == 0) {
+                    sistema.getTablero().Jugar(posY,posX,1,sistema.getTipoUsuario());
                 }
             }else {
                 getVentana().mensajeAlerta("Esperando jugador");
