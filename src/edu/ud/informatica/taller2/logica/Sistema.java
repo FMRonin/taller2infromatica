@@ -164,4 +164,9 @@ class Sistema{
         .
         setMensaje(mensaje);
     }*/
+
+    public
+    Tablero getTablero() {
+        return tablero;
+    }
 }

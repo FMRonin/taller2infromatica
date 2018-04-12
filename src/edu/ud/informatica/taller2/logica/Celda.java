@@ -13,10 +13,11 @@ class Celda {
     static public final int DERECHA = 0b10;
     static public final int ABAJO = 0b100;
     static public final int IZQUIERDA = 0b1000;
+    static public final int LLENA = 0b1111;
 
     // Estado Celda
-    static private final int CERRADA_CLIENTE = 1;
-    static private final int CERRADA_SERVIDOR = 2;
+    static public final int CERRADA_CLIENTE = 1;
+    static public final int CERRADA_SERVIDOR = 2;
 
     public Celda(){
         bordeCelda = 0;
@@ -42,5 +43,25 @@ class Celda {
         if((bordeCelda & 0b1111) == 0b1111){
             estadoCelda = jugador;
         }
+    }
+
+    public
+    int getBordeCelda() {
+        return bordeCelda;
+    }
+
+    public
+    int getEstadoCelda() {
+        return estadoCelda;
+    }
+
+    public
+    void setBordeCelda(int bordeCelda) {
+        this.bordeCelda = bordeCelda;
+    }
+
+    public
+    void setEstadoCelda(int estadoCelda) {
+        this.estadoCelda = estadoCelda;
     }
 }
