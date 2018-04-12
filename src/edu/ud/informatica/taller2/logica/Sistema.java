@@ -131,7 +131,7 @@ class Sistema{
         }
     }
 
-    public int recepcionMensaje(String mensaje){
+    public void recepcionMensaje(String mensaje){
         int respuestaMensaje = 0;
         String param = null;
         if (mensaje.substring(0,3).equals("QDT")) {
@@ -237,7 +237,7 @@ class Sistema{
                 }
             }
         }
-        return respuestaMensaje;
+
     }
     /*public static
     void validar() {
@@ -251,5 +251,12 @@ class Sistema{
     public
     Tablero getTablero() {
         return tablero;
+    }
+
+    public
+    void Jugar(int posY, int posX, int i, Boolean tipoUsuario) {
+        tablero.Jugar(posY,posX,i,tipoUsuario);
+        String respuesta = armadoCodigo(false, "OK", "10,10");
+        getServidor().Enviar(respuesta);
     }
 }

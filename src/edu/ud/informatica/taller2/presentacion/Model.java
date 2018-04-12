@@ -98,9 +98,9 @@ class Model implements Runnable{
                     g.fillRect(x1, y1, cuadro,cuadro);
                 }else { g.setColor(Color.WHITE); }
 
-                System.out.print(sistema.getTablero().getCelda(j,i).getBordeCelda());
+                //System.out.print(sistema.getTablero().getCelda(j,i).getBordeCelda());
             }
-            System.out.println("");
+            //System.out.println("");
         }
     }
 
@@ -149,7 +149,7 @@ class Model implements Runnable{
             getSistema().setNombreServidor(nombre);
             getSistema().setTipoUsuario(true);
             getVentana().mensajeAlerta("Esperando que alguien se conecte");
-            //getSistema().ConexionServicio(tipoUser);
+            getSistema().ConexionServicio(sistema.getTipoUsuario());
             startGame();
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
@@ -222,19 +222,19 @@ class Model implements Runnable{
         int sensibilidad = 2;
 
         try {
-            if(getSistema().getEstadoJugada() != 2){
+            if(getSistema().getEstadoJugada() == 2){
                 if (((posX * cuadro) + sensibilidad + MARGEN) >= e.getX() &&
                         (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.IZQUIERDA) == 0) {
-                    sistema.getTablero().Jugar(posY,posX,3,sistema.getTipoUsuario());
+                    sistema.Jugar(posY,posX,3,sistema.getTipoUsuario());
                 } else if (((posY * cuadro) + sensibilidad + MARGEN) >= e.getY() &&
                         (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.ARRIBA) == 0) {
-                    sistema.getTablero().Jugar(posY,posX,0,sistema.getTipoUsuario());
+                    sistema.Jugar(posY,posX,0,sistema.getTipoUsuario());
                 } else if (((posY * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getY() &&
                         (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.ABAJO) == 0) {
-                    sistema.getTablero().Jugar(posY,posX,2,sistema.getTipoUsuario());
+                    sistema.Jugar(posY,posX,2,sistema.getTipoUsuario());
                 } else if (((posX * cuadro) + cuadro - sensibilidad + MARGEN) <= e.getX() &&
-                        (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.IZQUIERDA) == 0) {
-                    sistema.getTablero().Jugar(posY,posX,1,sistema.getTipoUsuario());
+                        (sistema.getTablero().getCelda(posY,posX).getBordeCelda() & Celda.DERECHA) == 0) {
+                    sistema.Jugar(posY,posX,1,sistema.getTipoUsuario());
                 }
             }else {
                 getVentana().mensajeAlerta("Esperando jugador");

@@ -70,10 +70,10 @@ class Cliente implements Runnable {
 
     public void Escuchar(){
         eliminarEspacios();
-        int out = getSistema().recepcionMensaje(getMensaje());
-        if(out == 0){
-            FinalizarConexion();
-        }
+        //int out = getSistema().recepcionMensaje(getMensaje());
+        //if(out == 0){
+        //    FinalizarConexion();
+        //}
     }
 
     public void FinalizarConexion(){

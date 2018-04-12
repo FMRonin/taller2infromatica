@@ -70,13 +70,17 @@ class Servidor implements Runnable{
 
     public void IniciarConexion() throws IOException {
         serverSocket = new ServerSocket(PUERTO_SALIDA);
+        cliente = serverSocket.accept();
+        //cliente.setSoTimeout(TIMEOUT);
+        inputStream = new DataInputStream(cliente.getInputStream());
+        outputStream = new DataOutputStream(cliente.getOutputStream());
         hiloConexion = new Thread(this);
         hiloConexion.start();
     }
 
     public void Enviar(String mensaje){
         try {
-            outputStream = new DataOutputStream(cliente.getOutputStream());
+            //outputStream = new DataOutputStream(cliente.getOutputStream());
             outputStream.write(mensaje.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
@@ -86,10 +90,7 @@ class Servidor implements Runnable{
     public void Escuchar(){
         extraerIP();
         eliminarEspacios();
-        int out = getSistema().recepcionMensaje(getMensaje());
-        if(out == 0){
-            FinalizarConexion();
-        }
+        getSistema().recepcionMensaje(getMensaje());
     }
 
     public void FinalizarConexion(){
@@ -118,23 +119,22 @@ class Servidor implements Runnable{
     void run() {
         try {
             synchronized (hiloConexion){
+
                 while (conectado) {
-                    System.out.println("Esperando Conexion del Cliente");
-                    cliente = serverSocket.accept();
-                    cliente.setSoTimeout(TIMEOUT);
-                    inputStream = new DataInputStream(cliente.getInputStream());
-                    byte buffer[] = new byte[30];
+                    //System.out.println("Esperando Conexion del Cliente");
+                    byte buffer[] = new byte[255];
                     inputStream.read(buffer);
                     mensaje = new String(buffer);
+                    System.out.println(mensaje);
                     setIpCliente(cliente.getRemoteSocketAddress().toString());
                     Escuchar();
                     hiloConexion.wait(500);
                 }
             }
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         } catch (InterruptedException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 }
