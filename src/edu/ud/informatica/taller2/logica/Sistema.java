@@ -256,7 +256,7 @@ class Sistema{
     public
     void Jugar(int posY, int posX, int i, Boolean tipoUsuario) {
         tablero.Jugar(posY,posX,i,tipoUsuario);
-        String respuesta = armadoCodigo(false, "OK", "10,10");
+        String respuesta = armadoCodigo(true, "JUG", posY + "," + posX + "," + i);
         getServidor().Enviar(respuesta);
     }
 }
