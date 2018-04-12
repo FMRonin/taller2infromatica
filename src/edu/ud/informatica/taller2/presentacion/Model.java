@@ -22,7 +22,6 @@ class Model implements Runnable{
     private int columnas;
     private int cuadro;
 
-    private boolean bandera;
 
     private Graphics2D g;
 
@@ -61,7 +60,7 @@ class Model implements Runnable{
 
     private void dibujarCuadros() {
 
-        if(bandera) {
+        if(getSistema().isSwich()) {
 
             int thickness = 1;
 
@@ -121,7 +120,10 @@ class Model implements Runnable{
                 filas = getSistema().getTablero().getFilas();
                 columnas = getSistema().getTablero().getColumnas();
                 conectarCliente();
-                bandera = true;
+                getSistema().setSwich(true);
+            }
+            if (getSistema().getEstadoJugada() == 5){
+                dibujarJugadaContricante();
             }
         }
     }
@@ -168,11 +170,12 @@ class Model implements Runnable{
         }
         else
         {
-            bandera=true;
+            getSistema().setSwich(true);
             getSistema().setNombreServidor(nombre);
             getSistema().setTipoUsuario(true);
             getVentana().mensajeAlerta("Esperando que alguien se conecte");
             startGame();
+            getSistema().ConexionServicio(sistema.getTipoUsuario());
             hiloDibujo = new Thread(this);
             hiloDibujo.start();
             getSistema().ConexionServicio(sistema.getTipoUsuario());
@@ -201,8 +204,8 @@ class Model implements Runnable{
         }
         else
         {
-
-            getSistema().setNombreServidor(nombre);
+            getSistema().setSwich(false);
+            getSistema().setNombreCliente(nombre);
             getSistema().setIpServidor(ip);
             sistema.setTipoUsuario(false);
             hiloDibujo = new Thread(this);
@@ -259,6 +262,19 @@ class Model implements Runnable{
             }else {
                 getVentana().mensajeAlerta("Esperando jugador");
             }
+        }catch (ArrayIndexOutOfBoundsException err)
+        {
+            System.err.println(err);
+        }
+    }
+
+    public void dibujarJugadaContricante() {
+        int posX = getSistema().getFilaJugada();
+        int posY = getSistema().getColumnaJugada();
+        int sensibilidad = 2;
+
+        try {
+                sistema.Jugar(posY,posX,getSistema().getTrazoJugado(),sistema.getTipoUsuario());
         }catch (ArrayIndexOutOfBoundsException err)
         {
             System.err.println(err);
