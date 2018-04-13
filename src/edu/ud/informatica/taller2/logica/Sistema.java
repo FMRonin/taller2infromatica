@@ -12,53 +12,27 @@ class Sistema{
 
 
     private final int ESPERANDO_CONEXION = 0;
-    private final int ESPERANDO_NOMBRE = 0;
-    private final int JUGANDO = 0;
-    private final int ESPERANDO_JUGADA = 0;
-    private final int FINALIZADO = 0;
-    private boolean comandoValido;
+    private final int ESPERANDO_NOMBRE = 1;
+    private final int JUGANDO = 2;
+    private final int ESPERANDO_JUGADA = 3;
+    private final int FINALIZADO = 4;
+
+    private String nombreCliente;
+
     private boolean turno;
     private Thread hiloCanal;
     private Servidor servidor;
     private Cliente cliente;
-    // 0: esperando conexion, 1: Esperando nombre del contrincante, 2: Juego yo, 3: Esperando Jugada de adversario, 4: finalizado, 5.Analizando Jugada
+    private Boolean comandoValido;
+    // 0: esperando conexion, 1: Esperando nombre del contrincante, 2: Juego yo, 3: Esperando Jugada de adversario, 4: finalizado
     private int estadoJugada = 0;
     private Tablero tablero;
     private Boolean tipoUsuario;
-    private boolean swich;
     private String nombreServidor;
-    private String nombreCliente;
     private String IpServidor;
-    private int filaJugada;
-    private int columnaJugada;
-    private int trazoJugado;
-
-    public boolean isSwich() {
-        return swich;
-    }
-
-    public void setSwich(boolean swich) {
-        this.swich = swich;
-    }
-
-    public int getFilaJugada() {
-        return filaJugada;
-    }
-
-    public int getColumnaJugada() {
-        return columnaJugada;
-    }
-
-    public int getTrazoJugado() {
-        return trazoJugado;
-    }
 
     public void setNombreServidor(String nombreServidor) {
         this.nombreServidor = nombreServidor;
-    }
-
-    public void setNombreCliente(String nombreCliente) {
-        this.nombreCliente = nombreCliente;
     }
 
     public String getIpServidor() {
@@ -157,7 +131,7 @@ class Sistema{
                 //connexion como cliente
                 getCliente().setConectado(true);
                 getCliente().IniciarConexion(getIpServidor());
-                String respuesta = armadoCodigo(true, "INI", null);
+                String respuesta = armadoCodigo(true, "INI", "");
                 getCliente().Enviar(respuesta);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -192,6 +166,7 @@ class Sistema{
                             if(estadoJugada == 1) {
                                 estadoJugada = 2;
                                 param = mensaje.substring(20);
+                                nombreCliente = param;
                                 String respuesta = armadoCodigo(false, "OK", nombreServidor);
                                 getServidor().Enviar(respuesta);
                             }
@@ -199,7 +174,13 @@ class Sistema{
                         case "TUR":
                             if(estadoJugada == 3)
                             {
-                                param = mensaje.substring(20);
+                                estadoJugada = JUGANDO;
+                                String respuesta = armadoCodigo(false, "OK", (tipoUsuario)?"1":"2");
+                                if (tipoUsuario) {
+                                    getServidor().Enviar(respuesta);
+                                }else {
+                                    getCliente().Enviar(respuesta);
+                                }
                             }
                             break;
                         case "JUG":
@@ -207,11 +188,38 @@ class Sistema{
                             {
                                 param = mensaje.substring(20);
                                 String[] parts = param.split(",");
-                                filaJugada = Integer.parseInt(parts[0]);
-                                columnaJugada = Integer.parseInt(parts[1]);
-                                trazoJugado = Integer.parseInt(parts[2]);
-                                estadoJugada = 5;
-                                swich = false;
+                                int filaJugada = Integer.parseInt(parts[0]);
+                                int columnaJugada = Integer.parseInt(parts[1]);
+                                int trazoJugado = Integer.parseInt(parts[2]);
+                                int f;
+                                String respuesta = "";
+                                
+                                int t = tablero.Jugar(filaJugada, columnaJugada, trazoJugado, !tipoUsuario);
+                                if (t >= 0) {
+                                    if ((tablero.estaFinalizado())) {
+                                        f =  1;
+                                        estadoJugada = FINALIZADO;
+                                    }else {
+                                        f = 0;
+                                    }
+                                    respuesta = armadoCodigo(false, "OK", t + "," + f);
+                                }else {
+                                    switch (t){
+                                        case -1:
+                                            respuesta = armadoCodigo(false, "OK", "0" );
+                                            break;
+                                        case -2:
+                                            respuesta = armadoCodigo(false, "OK", "2" );
+                                            break;
+                                    }
+                                }
+                                if (tipoUsuario) {
+                                    getServidor().Enviar(respuesta);
+                                }else {
+                                    getCliente().Enviar(respuesta);
+                                }
+
+                                //CICLO MIENTRAS EVALUA EL PARAMETRO COMPLETO
                             }
                             break;
                     }
@@ -231,6 +239,7 @@ class Sistema{
             } else if (estadoJugada == 1){
                 //Como cliente recibo el nombre del servidor y paso a estadoJugada 3
                 param = mensaje.substring(3);
+                nombreServidor = param;
                 estadoJugada = 3;
                 respuestaMensaje = 1;
             } else if (estadoJugada == 3) {
@@ -239,13 +248,16 @@ class Sistema{
                 if(posicion > 0){
                     //Si existe una coma en el parameatro, significa que es una respuesta de JUG
                     String[] parts = param.split(",");
-                    int estadoCelda = Integer.parseInt(parts[0]);
-                    int estadoJuego = Integer.parseInt(parts[1]);
-                    if(estadoJuego == 0){
-                        if (estadoCelda == 0){
+                    int t = Integer.parseInt(parts[0]);
+                    int f = Integer.parseInt(parts[1]);
+                    if(f == 0){
+                        if (t == 0){
                             String respuesta = armadoCodigo(true, "TUR", (tipoUsuario)?"1":"2");
-                            tipoUsuario = !tipoUsuario;
-                            getServidor().Enviar(respuesta);
+                            if (tipoUsuario) {
+                                getServidor().Enviar(respuesta);
+                            }else {
+                                getCliente().Enviar(respuesta);
+                            }
                         }else {
                             estadoJugada = JUGANDO;
                         }
@@ -284,6 +296,14 @@ class Sistema{
         }
 
     }
+    /*public static
+    void validar() {
+        respuesta = Cliente.getRestpuesta();
+        .
+        .
+        .
+        setMensaje(mensaje);
+    }*/
 
     public
     Tablero getTablero() {
@@ -292,28 +312,28 @@ class Sistema{
 
     public
     void Jugar(int posY, int posX, int i, Boolean tipoUsuario) {
-        tablero.Jugar(posY, posX, i, tipoUsuario);
-        if(estadoJugada == 2) {
-            String respuesta = armadoCodigo(true, "JUG", posY + "," + posX + "," + i);
-            if(getTipoUsuario()) {
-                getServidor().Enviar(respuesta);
-            }
-            else
-            {
-                getCliente().Enviar(respuesta);
-            }
-            estadoJugada = 3;
+        int jugar = tablero.Jugar(posY, posX, i, tipoUsuario);
+        String respuesta = armadoCodigo(true, "JUG", posY + "," + posX + "," + i);
+        if (tipoUsuario) {
+            getServidor().Enviar(respuesta);
+        }else {
+            getCliente().Enviar(respuesta);
         }
-        else if(estadoJugada == 5){
-            String respuesta = armadoCodigo(false, "OK", "SALIDA");
-            if(getTipoUsuario()) {
-                getServidor().Enviar(respuesta);
-            }
-            else
-            {
-                getCliente().Enviar(respuesta);
-            }
-            estadoJugada = 3;
-        }
+        estadoJugada = 3;
+    }
+
+    public
+    void setNombreCliente(String nombreCliente) {
+        this.nombreCliente = nombreCliente;
+    }
+
+    public
+    String getNombreCliente() {
+        return nombreCliente;
+    }
+
+    public
+    String getNombreServidor() {
+        return nombreServidor;
     }
 }

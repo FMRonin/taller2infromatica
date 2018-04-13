@@ -22,6 +22,8 @@ class Model implements Runnable{
     private int columnas;
     private int cuadro;
 
+    private boolean bandera;
+
 
     private Graphics2D g;
 
@@ -60,12 +62,19 @@ class Model implements Runnable{
 
     private void dibujarCuadros() {
 
-        if(getSistema().isSwich()) {
+        if(bandera) {
 
             int thickness = 1;
 
             g = (Graphics2D) getVentana().getCnvTablero().getGraphics();
             g.setStroke(new BasicStroke(thickness));
+
+            if (getSistema().getEstadoJugada() == 4){
+                Finalizar();
+            }
+
+            getVentana().getRivalScore().setText(sistema.getNombreCliente() + ": " + sistema.getTablero().getPuntajeServido());
+            getVentana().getMyScore().setText(sistema.getNombreServidor() + ": " + sistema.getTablero().getPuntajeCliente());
 
             for (int i = 0; i < columnas; i++) {
                 for (int j = 0; j < filas; j++) {
@@ -104,7 +113,7 @@ class Model implements Runnable{
                         if (sistema.getTablero().getCelda(j, i).getEstadoCelda() == Celda.CERRADA_SERVIDOR) {
                             g.setColor(COLOR_SERVER);
                         } else if (sistema.getTablero().getCelda(j, i).getEstadoCelda() == Celda.CERRADA_CLIENTE) {
-                            g.setColor(COLOR_SERVER);
+                            g.setColor(COLOR_CLIENT);
                         }
                         g.fillRect(x1, y1, cuadro, cuadro);
                     } else {
@@ -120,10 +129,7 @@ class Model implements Runnable{
                 filas = getSistema().getTablero().getFilas();
                 columnas = getSistema().getTablero().getColumnas();
                 conectarCliente();
-                getSistema().setSwich(true);
-            }
-            if (getSistema().getEstadoJugada() == 5){
-                dibujarJugadaContricante();
+                bandera = true;
             }
         }
     }
@@ -160,7 +166,6 @@ class Model implements Runnable{
         getVentana().getPnServer().setVisible(false);
         getVentana().getPnClient().setVisible(false);
         getVentana().getPnGame().setVisible(false);
-        hiloDibujo = null;
     }
 
     public void CreateConn(){
@@ -170,7 +175,7 @@ class Model implements Runnable{
         }
         else
         {
-            getSistema().setSwich(true);
+            bandera = true;
             getSistema().setNombreServidor(nombre);
             getSistema().setTipoUsuario(true);
             //getVentana().mensajeAlerta("Esperando que alguien se conecte");
@@ -204,7 +209,7 @@ class Model implements Runnable{
         }
         else
         {
-            getSistema().setSwich(false);
+            bandera = false;
             getSistema().setNombreCliente(nombre);
             getSistema().setIpServidor(ip);
             sistema.setTipoUsuario(false);
@@ -236,7 +241,9 @@ class Model implements Runnable{
                 (columnas * cuadro) + (MARGEN * 2),
                 (filas * cuadro) + (MARGEN * 2)
         );
-        getVentana().getBtnReturnIni3().setLocation(((columnas + 1) * cuadro) + 10,30);
+        getVentana().getBtnReturnIni3().setLocation(((columnas + 1) * cuadro) + 10,100);
+        getVentana().getRivalScore().setLocation(((columnas + 1) * cuadro) + 10,10);
+        getVentana().getMyScore().setLocation(((columnas + 1) * cuadro) + 10,30);
     }
 
     public void Clicked(MouseEvent e) {
@@ -268,16 +275,23 @@ class Model implements Runnable{
         }
     }
 
-    public void dibujarJugadaContricante() {
-        int posX = getSistema().getFilaJugada();
-        int posY = getSistema().getColumnaJugada();
-        int sensibilidad = 2;
-
-        try {
-                sistema.Jugar(posY,posX,getSistema().getTrazoJugado(),sistema.getTipoUsuario());
-        }catch (ArrayIndexOutOfBoundsException err)
-        {
-            System.err.println(err);
+    public void Finalizar(){
+        hiloDibujo = null;
+        getSistema().getCliente().FinalizarConexion();
+        getSistema().getServidor().FinalizarConexion();
+        if (getSistema().getTablero().getPuntajeCliente() > getSistema().getTablero().getPuntajeServido()){
+            if (getSistema().getTipoUsuario()){
+                getVentana().mensajeAlerta("HAS PERDIDO");
+            }else {
+                getVentana().mensajeAlerta("HAS GANADO");
+            }
+        }else {
+            if (getSistema().getTipoUsuario()){
+                getVentana().mensajeAlerta("HAS GANADO");
+            }else {
+                getVentana().mensajeAlerta("HAS PERDIDO");
+            }
         }
+        ReturnIni();
     }
 }

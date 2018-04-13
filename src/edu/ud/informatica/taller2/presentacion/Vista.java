@@ -179,6 +179,14 @@ class Vista extends JFrame{
         pnGame.add(btnReturnIni3);
         btnReturnIni3.setSize(150,40);
 
+        rivalScore.setText("Rival");
+        pnGame.add(rivalScore);
+        rivalScore.setSize(200,20);
+
+        myScore.setText("JUGADOR");
+        pnGame.add(myScore);
+        myScore.setSize(200,20);
+
     }
 
     private JPanel pnIni;
